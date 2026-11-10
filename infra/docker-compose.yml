@@ -1,0 +1,81 @@
+name: hw2
+
+x-rabbit: &rabbit
+  image: rabbitmq:3.13-management
+  env_file: rabbit.env
+  networks: [amqp-net]
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+    interval: 10s
+    timeout: 10s
+    retries: 10
+
+services:
+  rabbit1:
+    <<: *rabbit
+    container_name: rabbit1
+    hostname: rabbit1
+    environment: { RABBITMQ_NODENAME: rabbit@rabbit1 }
+    ports: ["5672:5672", "15672:15672", "15692:15692"]
+    volumes:
+      - rabbit1-data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+
+  rabbit2:
+    <<: *rabbit
+    container_name: rabbit2
+    hostname: rabbit2
+    environment: { RABBITMQ_NODENAME: rabbit@rabbit2 }
+    ports: ["5673:5672", "15673:15672", "15693:15692"]
+    volumes:
+      - rabbit2-data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+
+  rabbit3:
+    <<: *rabbit
+    container_name: rabbit3
+    hostname: rabbit3
+    environment: { RABBITMQ_NODENAME: rabbit@rabbit3 }
+    ports: ["5674:5672", "15674:15672", "15694:15692"]
+    volumes:
+      - rabbit3-data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    networks: [amqp-net]
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on: [rabbit1, rabbit2, rabbit3]
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    networks: [amqp-net]
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus]
+
+networks:
+  amqp-net:
+    name: hw2-net
+
+volumes:
+  rabbit1-data:
+  rabbit2-data:
+  rabbit3-data:
+  prometheus-data:
+  grafana-data:
