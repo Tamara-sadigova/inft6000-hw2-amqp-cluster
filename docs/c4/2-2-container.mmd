@@ -1,0 +1,31 @@
+C4Container
+    title Container Diagram - hw2-net
+
+    Person(operator, "Operator")
+    System_Ext(producer, "Producer client", "Python, pika")
+    System_Ext(consumer, "Consumer client", "Python, pika")
+
+    System_Boundary(cluster, "RabbitMQ cluster (Docker network hw2-net)") {
+        Container(r1, "rabbit1", "RabbitMQ 3.13", "AMQP 5672, UI 15672, metrics 15692 (host 5672/15672/15692)")
+        Container(r2, "rabbit2", "RabbitMQ 3.13", "AMQP 5672, UI 15672, metrics 15692 (host 5673/15673/15693)")
+        Container(r3, "rabbit3", "RabbitMQ 3.13", "AMQP 5672, UI 15672, metrics 15692 (host 5674/15674/15694)")
+    }
+
+    System_Boundary(mon, "Monitoring (Docker network hw2-net)") {
+        Container(prom, "prometheus", "Prometheus", "Port 9090, scrape interval 5s")
+        Container(graf, "grafana", "Grafana", "Port 3000, provisioned dashboards")
+    }
+
+    Rel(producer, r1, "Publish, confirms", "AMQP 5672")
+    Rel(producer, r2, "Failover", "AMQP 5673")
+    Rel(consumer, r1, "Consume, manual ack", "AMQP 5672")
+    Rel(consumer, r3, "Failover", "AMQP 5674")
+    Rel(r1, r2, "Raft replication", "Erlang dist. 25672")
+    Rel(r2, r3, "Raft replication", "Erlang dist. 25672")
+    Rel(r1, r3, "Raft replication", "Erlang dist. 25672")
+    Rel(prom, r1, "Scrape", "15692")
+    Rel(prom, r2, "Scrape", "15692")
+    Rel(prom, r3, "Scrape", "15692")
+    Rel(graf, prom, "Query", "9090")
+    Rel(operator, graf, "Dashboards", "3000")
+    Rel(operator, r1, "Management UI", "15672")

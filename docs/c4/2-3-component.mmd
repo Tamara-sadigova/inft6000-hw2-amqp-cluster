@@ -1,0 +1,31 @@
+C4Component
+    title Component Diagram - clients and broker node
+
+    Container_Boundary(clients, "Test clients (Python, pika)") {
+        Component(pub, "Publisher threads", "Python", "Assign seq, publish with publisher confirms")
+        Component(con, "Consumer", "Python", "Manual ack, prefetch")
+        Component(retry, "Retry handler", "Python", "Reconnect and republish with exponential backoff")
+        Component(pool, "Connection manager and channel pool", "pika", "Connections to all 3 endpoints, one channel per thread")
+        Component(val, "Validator", "Python", "Detects loss, duplicates and reordering using seq")
+        Component(logger, "Structured logger", "Python", "JSON event log")
+    }
+
+    Container_Boundary(broker, "RabbitMQ node (rabbit1, rabbit2, rabbit3)") {
+        Component(handler, "Connection and channel handler", "AMQP 0-9-1, port 5672", "Accepts client connections")
+        Component(exchange, "Default exchange", "Direct", "Routes by routing key hw2.orders")
+        Component(queue, "Quorum queue hw2.orders", "Raft group", "Leader or follower replica with replicated log")
+        Component(mgmt, "Management plugin", "Port 15672", "Web UI and HTTP API")
+        Component(promplugin, "Prometheus plugin", "Port 15692", "Exposes metrics")
+    }
+
+    Rel(pub, retry, "On failure")
+    Rel(con, retry, "On failure")
+    Rel(retry, pool, "Reconnect")
+    Rel(pub, pool, "Uses channel")
+    Rel(con, pool, "Uses channel")
+    Rel(pub, logger, "Logs events")
+    Rel(con, logger, "Logs events")
+    Rel(val, logger, "Reads logs")
+    Rel(pool, handler, "AMQP")
+    Rel(handler, exchange, "Publishes")
+    Rel(exchange, queue, "Routes")

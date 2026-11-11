@@ -1,0 +1,14 @@
+C4Context
+    title System Context - AMQP Messaging Cluster
+
+    Person(operator, "Operator", "Inspects and manages the cluster")
+    System_Ext(producerApp, "Producer application", "Publishes order messages")
+    System_Ext(consumerApp, "Consumer application", "Processes order messages")
+    System(cluster, "RabbitMQ cluster", "3-node cluster, Quorum Queues, management UI")
+    System(monitoring, "Monitoring stack", "Prometheus and Grafana dashboards")
+
+    Rel(producerApp, cluster, "Publishes with confirms", "AMQP")
+    Rel(consumerApp, cluster, "Consumes with manual ack", "AMQP")
+    Rel(monitoring, cluster, "Scrapes metrics", "HTTP")
+    Rel(operator, cluster, "Manages", "Management UI / CLI")
+    Rel(operator, monitoring, "Views dashboards", "HTTP")
