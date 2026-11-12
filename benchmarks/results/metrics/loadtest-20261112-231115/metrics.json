@@ -1,0 +1,103 @@
+{
+  "run_dir": "/home/ravan/VsCode/inft6000-hw2-amqp-cluster/benchmarks/results/metrics/loadtest-20261112-231115",
+  "duration_s": 6.634,
+  "publish": {
+    "sent_attempts": 2000,
+    "confirmed": 2000,
+    "nacked_or_failed": 0,
+    "throughput_msg_s": 301.48,
+    "confirm_latency_ms": {
+      "count": 2000,
+      "p50": 3.208,
+      "p95": 4.926,
+      "p99": 6.337,
+      "min": 1.46,
+      "max": 29.7,
+      "mean": 3.261
+    }
+  },
+  "consume": {
+    "consumed": 2000,
+    "acked": 2000,
+    "redelivered": 0,
+    "rejected_malformed": 0,
+    "throughput_msg_s": 301.48,
+    "end_to_end_latency_ms": {
+      "count": 2000,
+      "p50": 3.255,
+      "p95": 4.97,
+      "p99": 6.409,
+      "min": 1.529,
+      "max": 29.223,
+      "mean": 3.307
+    }
+  },
+  "per_producer": {
+    "p1": {
+      "sent": 2000,
+      "confirmed": 2000,
+      "nacked": 0,
+      "node": "localhost:5672"
+    }
+  },
+  "per_consumer": {
+    "c1": {
+      "consumed": 2000,
+      "acked": 2000,
+      "redelivered": 0,
+      "rejected": 0,
+      "node": "localhost:5672"
+    }
+  },
+  "integrity": {
+    "unique_confirmed": 2000,
+    "unique_acked": 2000,
+    "missing_after_run": 0,
+    "unexpected_acked": 0,
+    "duplicate_consumed": 0
+  },
+  "timeline": [
+    {
+      "t_rel": 0.0,
+      "confirmed": 268,
+      "acked": 268,
+      "consumed": 268
+    },
+    {
+      "t_rel": 1.0,
+      "confirmed": 332,
+      "acked": 332,
+      "consumed": 332
+    },
+    {
+      "t_rel": 2.0,
+      "confirmed": 306,
+      "acked": 306,
+      "consumed": 306
+    },
+    {
+      "t_rel": 3.0,
+      "confirmed": 310,
+      "acked": 310,
+      "consumed": 310
+    },
+    {
+      "t_rel": 4.0,
+      "confirmed": 315,
+      "acked": 315,
+      "consumed": 315
+    },
+    {
+      "t_rel": 5.0,
+      "confirmed": 297,
+      "acked": 297,
+      "consumed": 297
+    },
+    {
+      "t_rel": 6.0,
+      "confirmed": 172,
+      "acked": 172,
+      "consumed": 172
+    }
+  ]
+}

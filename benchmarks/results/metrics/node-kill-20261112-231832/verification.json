@@ -1,0 +1,22 @@
+{
+  "run_dir": "/home/ravan/VsCode/inft6000-hw2-amqp-cluster/benchmarks/results/metrics/node-kill-20261112-231832",
+  "verdict": "PASS",
+  "publisher_confirmed": 5000,
+  "consumer_acked": 5000,
+  "missing_count": 0,
+  "missing_sample": [],
+  "unexpected_acked_count": 0,
+  "duplicate_consumed_count": 1,
+  "reordered": 0,
+  "nack_or_failure_events": 0,
+  "producer_reconnects": 0,
+  "consumer_reconnects": 1,
+  "integrity_ok": true,
+  "note": "Delegates to clients/validate.py. missing_count = confirmed-but-not-acked at the final poll. During quorum failure, in-flight messages are expected to appear here until they drain; use --wait-seconds to let the cluster settle before calling them lost. duplicates are reported but expected on redelivery and do not fail integrity_ok.",
+  "chaos": {
+    "node": "rabbit3",
+    "stop_at": 1794511118.8632555,
+    "start_at": 1794511127.8608513,
+    "recovery_s": 6.796057224273682
+  }
+}
