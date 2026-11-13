@@ -6,10 +6,11 @@ import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from run_utils import iter_log_files, read_jsonl
+from run_utils import iter_log_files, read_jsonl, read_meta
 
 
 def percentile(values, pct):
+    """Linear-interpolation percentile (same as numpy's default 'linear' method)."""
     if not values:
         return None
     ordered = sorted(values)
@@ -36,140 +37,210 @@ def summarize(values):
     }
 
 
-def build_timeline(run_dir: Path, run_start: float, bucket: float) -> list[dict]:
-    buckets = defaultdict(lambda: {"confirmed": 0, "acked": 0, "consumed": 0})
-    for path in iter_log_files(run_dir, "producer"):
-        for rec in read_jsonl(path):
-            ev = rec.get("event")
-            ts = rec.get("ts")
-            if ev in ("publish_confirmed",) and ts is not None:
-                b = int((ts - run_start) / bucket)
-                buckets[b]["confirmed"] += 1
-    for path in iter_log_files(run_dir, "consumer"):
-        for rec in read_jsonl(path):
-            ev = rec.get("event")
-            ts = rec.get("ts")
-            if ev == "consume" and ts is not None:
-                b = int((ts - run_start) / bucket)
-                buckets[b]["consumed"] += 1
-            elif ev == "ack" and ts is not None:
-                b = int((ts - run_start) / bucket)
-                buckets[b]["acked"] += 1
-    return [{"t_rel": round(b * bucket, 2), **buckets[b]} for b in sorted(buckets)]
+def _window(first: float | None, last: float | None) -> float | None:
+    if first is None or last is None or last <= first:
+        return None
+    return last - first
+
+
+def largest_gaps(ts: list[float], run_start: float, n: int = 3, after: float | None = None) -> list[dict]:
+    """Largest silences between consecutive events (sorted timestamps).
+
+    If `after` is given, only gaps that END after that time are considered,
+    i.e. silences that overlap or follow a fault.
+    """
+    gaps = []
+    for a, b in zip(ts, ts[1:]):
+        if after is not None and b < after:
+            continue
+        gaps.append((b - a, a, b))
+    gaps.sort(reverse=True)
+    return [{"gap_s": round(g, 3), "from_rel": round(a - run_start, 3), "to_rel": round(b - run_start, 3),
+             "from_ts": a, "to_ts": b} for g, a, b in gaps[:n]]
+
+
+def build_timeline(series: dict[str, list[float]], run_start: float, run_end: float,
+                   bucket: float) -> list[dict]:
+    """Per-bucket event counts, with EVERY bucket from 0 to the end present (zeros included)."""
+    n_buckets = int((run_end - run_start) / bucket) + 1
+    rows = [{"t_rel": round(i * bucket, 3), **{k: 0 for k in series}} for i in range(n_buckets)]
+    for key, ts_list in series.items():
+        for ts in ts_list:
+            i = int((ts - run_start) / bucket)
+            if 0 <= i < n_buckets:
+                rows[i][key] += 1
+    return rows
 
 
 def compute(run_dir: Path, bucket_seconds: float | None = None) -> dict:
+    meta = read_meta(run_dir) or {}
+
     sent = Counter()
     confirmed = Counter()
     nacked = Counter()
-    confirm_lat = defaultdict(list)
-    p_first, p_last, p_node = {}, {}, {}
+    confirm_lat = []
+    p_nodes = defaultdict(set)
     confirmed_ids: set[tuple] = set()
+    sent_ts, confirm_ts = [], []
+    confirm_ts_by_pid = defaultdict(list)
 
     for path in iter_log_files(run_dir, "producer"):
         for rec in read_jsonl(path):
             ev = rec.get("event")
             pid = rec.get("producer_id")
-            seq = rec.get("seq")
             ts = rec.get("ts")
             if ev == "publish_sent":
                 sent[pid] += 1
-                p_first.setdefault(pid, ts)
-                p_last[pid] = ts
-                p_node[pid] = rec.get("node")
+                sent_ts.append(ts)
+                if rec.get("node"):
+                    p_nodes[pid].add(rec["node"])
             elif ev == "publish_confirmed":
                 confirmed[pid] += 1
-                p_last[pid] = ts
-                confirmed_ids.add((pid, seq))
+                confirm_ts.append(ts)
+                confirm_ts_by_pid[pid].append(ts)
+                confirmed_ids.add((pid, rec.get("seq")))
                 if "latency_ms" in rec:
-                    confirm_lat[pid].append(rec["latency_ms"])
+                    confirm_lat.append(rec["latency_ms"])
             elif ev == "publish_nack":
                 nacked[pid] += 1
-                p_last[pid] = ts
 
     consumed = Counter()
     acked = Counter()
     rejected = Counter()
     redelivered = Counter()
-    e2e_lat = defaultdict(list)
-    c_first, c_last, c_node = {}, {}, {}
+    e2e_lat = []
+    c_nodes = defaultdict(set)
     consumed_ids = Counter()
     acked_ids: set[tuple] = set()
+    consume_ts, ack_ts = [], []
 
     for path in iter_log_files(run_dir, "consumer"):
         for rec in read_jsonl(path):
             ev = rec.get("event")
             cid = rec.get("consumer_id")
-            pid = rec.get("producer_id")
-            seq = rec.get("seq")
             ts = rec.get("ts")
+            key = (rec.get("producer_id"), rec.get("seq"))
             if ev == "consume":
                 consumed[cid] += 1
-                c_first.setdefault(cid, ts)
-                c_last[cid] = ts
-                c_node[cid] = rec.get("node")
-                consumed_ids[(pid, seq)] += 1
+                consume_ts.append(ts)
+                if rec.get("node"):
+                    c_nodes[cid].add(rec["node"])
+                consumed_ids[key] += 1
                 if "latency_ms" in rec:
-                    e2e_lat[cid].append(rec["latency_ms"])
+                    e2e_lat.append(rec["latency_ms"])
                 if rec.get("redelivered"):
                     redelivered[cid] += 1
             elif ev == "ack":
                 acked[cid] += 1
-                acked_ids.add((pid, seq))
+                ack_ts.append(ts)
+                acked_ids.add(key)
             elif ev == "reject":
                 rejected[cid] += 1
 
-    all_confirm = [v for lst in confirm_lat.values() for v in lst]
-    all_e2e = [v for lst in e2e_lat.values() for v in lst]
+    for lst in (sent_ts, confirm_ts, consume_ts, ack_ts):
+        lst.sort()
 
-    starts = [t for t in [*p_first.values(), *c_first.values()] if t]
-    ends = [t for t in [*p_last.values(), *c_last.values()] if t]
-    run_start = min(starts) if starts else None
-    run_end = max(ends) if ends else None
-    duration = (run_end - run_start) if run_start and run_end else None
+    # Separate windows: publish = first publish_sent -> last publish_confirmed,
+    # consume = first consume -> last ack. Using one shared window (as before)
+    # forced both rates to be equal whenever the counts were equal.
+    pub_window = _window(sent_ts[0] if sent_ts else None, confirm_ts[-1] if confirm_ts else None)
+    con_window = _window(consume_ts[0] if consume_ts else None, ack_ts[-1] if ack_ts else None)
+    all_ts = [t for t in (sent_ts[:1] + consume_ts[:1]) if t is not None]
+    end_ts = [t for t in (confirm_ts[-1:] + ack_ts[-1:]) if t is not None]
+    run_start = min(all_ts) if all_ts else None
+    run_end = max(end_ts) if end_ts else None
 
     total_confirmed = sum(confirmed.values())
-    total_acked = sum(acked.values())
+    unique_acked = len(acked_ids)
 
     result = {
         "run_dir": str(run_dir),
-        "duration_s": round(duration, 3) if duration else None,
+        "run_id": run_dir.name,
+        "run_start_ts": run_start,
+        "duration_s": round(run_end - run_start, 3) if run_start and run_end else None,
         "publish": {
             "sent_attempts": sum(sent.values()),
             "confirmed": total_confirmed,
             "nacked_or_failed": sum(nacked.values()),
-            "throughput_msg_s": round(total_confirmed / duration, 2) if duration else None,
-            "confirm_latency_ms": summarize(all_confirm),
+            "window_s": round(pub_window, 3) if pub_window else None,
+            "throughput_msg_s": round(total_confirmed / pub_window, 2) if pub_window else None,
+            "confirm_latency_ms": summarize(confirm_lat),
         },
         "consume": {
-            "consumed": sum(consumed.values()),
-            "acked": total_acked,
+            "consumed_events": sum(consumed.values()),
+            "consumed_unique": len(consumed_ids),
+            "acked_events": sum(acked.values()),
+            "acked_unique": unique_acked,
             "redelivered": sum(redelivered.values()),
             "rejected_malformed": sum(rejected.values()),
-            "throughput_msg_s": round(total_acked / duration, 2) if duration else None,
-            "end_to_end_latency_ms": summarize(all_e2e),
+            "window_s": round(con_window, 3) if con_window else None,
+            "throughput_msg_s": round(unique_acked / con_window, 2) if con_window else None,
+            "end_to_end_latency_ms": summarize(e2e_lat),
         },
         "per_producer": {
-            pid: {"sent": sent[pid], "confirmed": confirmed[pid],
-                  "nacked": nacked[pid], "node": p_node.get(pid)}
+            pid: {"sent": sent[pid], "confirmed": confirmed[pid], "nacked": nacked[pid],
+                  "nodes": sorted(p_nodes.get(pid, ())),
+                  "largest_confirm_gap": (largest_gaps(sorted(confirm_ts_by_pid[pid]), run_start, 1) or [None])[0]}
             for pid in sent
         },
         "per_consumer": {
-            cid: {"consumed": consumed[cid], "acked": acked[cid],
-                  "redelivered": redelivered[cid],
-                  "rejected": rejected[cid], "node": c_node.get(cid)}
+            cid: {"consumed": consumed[cid], "acked": acked[cid], "redelivered": redelivered[cid],
+                  "rejected": rejected[cid], "nodes": sorted(c_nodes.get(cid, ()))}
             for cid in consumed
         },
         "integrity": {
             "unique_confirmed": len(confirmed_ids),
-            "unique_acked": len(acked_ids),
-            "missing_after_run": len(confirmed_ids - acked_ids),
-            "unexpected_acked": len(acked_ids - confirmed_ids),
+            "unique_consumed": len(consumed_ids),
+            "unique_acked": unique_acked,
+            "confirmed_not_consumed": len(confirmed_ids - set(consumed_ids)),
+            "confirmed_not_acked": len(confirmed_ids - acked_ids),
+            "acked_not_confirmed": len(acked_ids - confirmed_ids),
             "duplicate_consumed": sum(1 for v in consumed_ids.values() if v > 1),
+            "note": "Authoritative verdict is in verification.json (verify_zero_loss.py).",
         },
+        "notes": [
+            "Producers use synchronous publisher confirms (one message in flight per "
+            "producer), so publish throughput per producer is bounded by ~1/confirm latency; "
+            "it is not the cluster's capacity.",
+            "Latency percentiles only include messages that were sent. Time a producer spent "
+            "blocked during an outage is not spread over the messages it would have sent "
+            "(coordinated omission): see 'gaps' / 'client_outage' for outage duration.",
+        ],
     }
-    if bucket_seconds and run_start and duration:
-        result["timeline"] = build_timeline(run_dir, run_start, bucket_seconds)
+
+    if run_start is not None:
+        result["gaps"] = {
+            "confirm": largest_gaps(confirm_ts, run_start),
+            "ack": largest_gaps(ack_ts, run_start),
+            "typical_confirm_interval_s": (round(statistics.median(
+                [b - a for a, b in zip(confirm_ts, confirm_ts[1:])]), 4) if len(confirm_ts) > 2 else None),
+        }
+
+    # Fault markers + client-visible outage (only when the run recorded a fault time).
+    events = []
+    fault = meta.get("fault") or {}
+    if run_start is not None:
+        for e in meta.get("events") or []:
+            if e.get("ts") is not None:
+                events.append({"label": e["label"], "ts": e["ts"], "t_rel": round(e["ts"] - run_start, 3)})
+        result["events"] = events
+        if fault.get("start_ts"):
+            after = fault["start_ts"]
+            c = largest_gaps(confirm_ts, run_start, 1, after=after)
+            a = largest_gaps(ack_ts, run_start, 1, after=after)
+            result["client_outage"] = {
+                "definition": "largest gap between consecutive events (all producers / all consumers "
+                              "merged) that ends after the fault was injected",
+                "fault_start_rel": round(after - run_start, 3),
+                "confirm": c[0] if c else None,
+                "ack": a[0] if a else None,
+            }
+
+    if bucket_seconds and run_start is not None and run_end is not None:
+        result["timeline_bucket_s"] = bucket_seconds
+        result["timeline"] = build_timeline(
+            {"confirmed": confirm_ts, "consumed": consume_ts, "acked": ack_ts},
+            run_start, run_end, bucket_seconds)
     return result
 
 

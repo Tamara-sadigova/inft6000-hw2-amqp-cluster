@@ -1,13 +1,14 @@
-"""Cluster health check via docker exec + rabbitmqctl."""
+"""Cluster health check via docker exec + rabbitmqctl / rabbitmq-queues."""
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "benchmarks"))
-from run_utils import CONTAINERS, cluster_status, queue_stats
+from run_utils import CONTAINERS, cluster_status, queue_stats, quorum_status
 
 
 def _short_name(n: str) -> str:
@@ -49,6 +50,7 @@ def _partitions(status: dict) -> list:
 
 
 def cluster_healthy(status: dict) -> bool:
+    """Erlang-level health: all nodes running and no partition recorded."""
     if not status.get("ok"):
         return False
     if _partitions(status):
@@ -56,17 +58,57 @@ def cluster_healthy(status: dict) -> bool:
     return set(CONTAINERS).issubset(_node_names(status))
 
 
+def quorum_healthy(qs: dict) -> bool:
+    """Queue-level health: every node is a voter in a known Raft state, one leader, one term."""
+    if not qs.get("ok"):
+        return False
+    members = {m["node"]: m for m in qs["members"]}
+    if set(members) != set(CONTAINERS):
+        return False
+    if len(qs.get("leaders") or []) != 1:
+        return False
+    if any(m["state"] not in ("leader", "follower") or m["membership"] != "voter"
+           for m in members.values()):
+        return False
+    return len({m["term"] for m in members.values()}) == 1
+
+
 def check(container: str = "rabbit1") -> dict:
     status = cluster_status(container)
     queue = queue_stats(container)
+    qs = quorum_status(container)
+    erlang_ok = cluster_healthy(status)
+    quorum_ok = quorum_healthy(qs)
     return {
         "container": container,
         "cluster_status": status,
         "queue": queue,
-        "healthy": cluster_healthy(status),
+        "quorum": qs,
+        "erlang_healthy": erlang_ok,
+        "quorum_healthy": quorum_ok,
+        "healthy": erlang_ok and quorum_ok,
         "running_nodes": sorted(_node_names(status)),
         "partitions": _partitions(status),
     }
+
+
+def wait_rejoined(t0: float, timeout: float, container: str = "rabbit1",
+                  poll: float = 1.0) -> dict:
+    """Poll until the cluster AND the quorum queue are healthy.
+
+    Returns the elapsed time measured from t0 (pass the time the restore
+    command was issued) so the figure includes the restore command itself.
+    Resolution is bounded by `poll` plus the rabbitmqctl call time (~1 s).
+    """
+    attempts = 0
+    while time.time() - t0 < timeout:
+        attempts += 1
+        h = check(container)
+        if h["healthy"]:
+            return {"ok": True, "rejoin_s": round(time.time() - t0, 3), "polls": attempts,
+                    "leader": h["quorum"].get("leader"), "term": h["quorum"].get("term")}
+        time.sleep(poll)
+    return {"ok": False, "rejoin_s": None, "polls": attempts, "timeout_s": timeout}
 
 
 def main():
@@ -78,8 +120,9 @@ def main():
     if args.json:
         print(json.dumps(out, indent=2))
     else:
+        q = out["quorum"]
         print(f"healthy={out['healthy']}  running_nodes={out['running_nodes']}  "
-              f"partitions={out['partitions']}")
+              f"partitions={out['partitions']}  queue_leader={q.get('leader')}  term={q.get('term')}")
         print(json.dumps(out, indent=2))
     sys.exit(0 if out["healthy"] else 1)
 
