@@ -1,0 +1,413 @@
+{
+  "kind": "partition",
+  "args": {
+    "node": "rabbit3",
+    "total_count": 12000,
+    "threads": 1,
+    "rate": 100.0,
+    "consumers": 2,
+    "partition_after": 5.0,
+    "partition_seconds": 90.0,
+    "sample_interval": 2.0,
+    "recovery_timeout": 120,
+    "drain_timeout": 180,
+    "consumer_idle": 30.0,
+    "dry_run": false
+  },
+  "queue_before": {
+    "ts": 1794564531.7822113,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit3",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "events": [
+    {
+      "label": "disconnect rabbit3",
+      "ts": 1794564538.4397523
+    },
+    {
+      "label": "reconnect rabbit3",
+      "ts": 1794564629.6689968
+    },
+    {
+      "label": "cluster+quorum healthy",
+      "ts": 1794564631.7443888
+    },
+    {
+      "label": "majority: rabbit3 down",
+      "ts": 1794564610.705917
+    },
+    {
+      "label": "rabbit3 paused (minority)",
+      "ts": 1794564606.30813
+    },
+    {
+      "label": "new leader rabbit1 (term 11)",
+      "ts": 1794564546.815967
+    }
+  ],
+  "fault": {
+    "type": "docker network disconnect hw2-net",
+    "target": "rabbit3",
+    "target_role": "leader",
+    "injected": true,
+    "start_ts": 1794564538.4397523,
+    "isolated_ts": 1794564538.9922583,
+    "restore_issued_ts": 1794564628.9923887,
+    "reconnected_ts": 1794564629.6689968,
+    "restored": {
+      "ok": true,
+      "attempts": 1,
+      "aliases": [
+        "rabbit3"
+      ],
+      "errors": []
+    }
+  },
+  "chaos": {
+    "node": "rabbit3",
+    "network": "hw2-net",
+    "target_selection": "rabbit3",
+    "target_role": "leader",
+    "observer": "rabbit1",
+    "net_ticktime_s": 60,
+    "partition_seconds_requested": 90.0,
+    "leader_before": {
+      "ts": 1794564532.315577,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit3",
+      "term": 10,
+      "members": {
+        "rabbit1": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit3": {
+          "state": "leader",
+          "term": 10
+        }
+      }
+    },
+    "samples": [
+      {
+        "ts": 1794564538.9924479,
+        "majority_running_nodes": null,
+        "majority_partitions": null,
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": true,
+        "started_ts": 1794564538.9924467,
+        "done_ts": 1794564556.2320814,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564558.2322206,
+        "majority_running_nodes": null,
+        "majority_partitions": null,
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": true,
+        "started_ts": 1794564558.2322195,
+        "done_ts": 1794564575.4026964,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564577.4028118,
+        "majority_running_nodes": null,
+        "majority_partitions": null,
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": true,
+        "started_ts": 1794564577.4028103,
+        "done_ts": 1794564594.6129549,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564596.6130965,
+        "majority_running_nodes": null,
+        "majority_partitions": null,
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": false,
+        "started_ts": 1794564596.6130953,
+        "done_ts": 1794564611.289927,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564613.2900548,
+        "majority_running_nodes": [
+          "rabbit1",
+          "rabbit2"
+        ],
+        "majority_partitions": [],
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": false,
+        "started_ts": 1794564613.2900538,
+        "done_ts": 1794564615.0090885,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564617.0092459,
+        "majority_running_nodes": [
+          "rabbit1",
+          "rabbit2"
+        ],
+        "majority_partitions": [],
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": false,
+        "started_ts": 1794564617.009245,
+        "done_ts": 1794564618.6069858,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564620.607091,
+        "majority_running_nodes": [
+          "rabbit1",
+          "rabbit2"
+        ],
+        "majority_partitions": [],
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": false,
+        "started_ts": 1794564620.6070902,
+        "done_ts": 1794564622.19536,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564624.195489,
+        "majority_running_nodes": [
+          "rabbit1",
+          "rabbit2"
+        ],
+        "majority_partitions": [],
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": false,
+        "started_ts": 1794564624.1954865,
+        "done_ts": 1794564626.0534039,
+        "completed_after_reconnect": false
+      },
+      {
+        "ts": 1794564628.0535312,
+        "majority_running_nodes": [
+          "rabbit1",
+          "rabbit2"
+        ],
+        "majority_partitions": [],
+        "leader": "rabbit1",
+        "term": 11,
+        "target_rabbit_running": false,
+        "started_ts": 1794564628.0535295,
+        "done_ts": 1794564630.010941,
+        "completed_after_reconnect": true
+      }
+    ],
+    "partition_seconds_actual": 90.677,
+    "node_rejoin": {
+      "ok": true,
+      "rejoin_s": 2.752,
+      "polls": 1,
+      "leader": "rabbit1",
+      "term": 11
+    },
+    "leader_after": {
+      "ts": 1794564670.675155,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit1",
+      "term": 11,
+      "members": {
+        "rabbit1": {
+          "state": "leader",
+          "term": 11
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 11
+        },
+        "rabbit3": {
+          "state": "follower",
+          "term": 11
+        }
+      }
+    },
+    "broker_evidence": {
+      "majority_logged_target_down": [
+        {
+          "container": "rabbit1",
+          "ts": 1794564610.705917,
+          "line": "2026-11-13 10:10:10.705917+00:00 [info] <0.518.0> rabbit on node rabbit@rabbit3 down"
+        },
+        {
+          "container": "rabbit1",
+          "ts": 1794564610.713517,
+          "line": "2026-11-13 10:10:10.713517+00:00 [info] <0.518.0> node rabbit@rabbit3 down: net_tick_timeout"
+        },
+        {
+          "container": "rabbit2",
+          "ts": 1794564605.845602,
+          "line": "2026-11-13 10:10:05.845602+00:00 [info] <0.528.0> rabbit on node rabbit@rabbit3 down"
+        },
+        {
+          "container": "rabbit2",
+          "ts": 1794564610.711329,
+          "line": "2026-11-13 10:10:10.711329+00:00 [info] <0.528.0> node rabbit@rabbit3 down: net_tick_timeout"
+        }
+      ],
+      "target_logged_peers_down": [
+        {
+          "container": "rabbit3",
+          "ts": 1794564606.300002,
+          "line": "2026-11-13 10:10:06.300002+00:00 [info] <0.5711.0> rabbit on node rabbit@rabbit2 down"
+        },
+        {
+          "container": "rabbit3",
+          "ts": 1794564606.308052,
+          "line": "2026-11-13 10:10:06.308052+00:00 [info] <0.5711.0> node rabbit@rabbit2 down: net_tick_timeout"
+        },
+        {
+          "container": "rabbit3",
+          "ts": 1794564606.308157,
+          "line": "2026-11-13 10:10:06.308157+00:00 [info] <0.5711.0> rabbit on node rabbit@rabbit1 down"
+        },
+        {
+          "container": "rabbit3",
+          "ts": 1794564606.313361,
+          "line": "2026-11-13 10:10:06.313361+00:00 [info] <0.5711.0> node rabbit@rabbit1 down: net_tick_timeout"
+        }
+      ],
+      "pause_minority_log": [
+        {
+          "container": "rabbit3",
+          "ts": 1794564606.30813,
+          "line": "2026-11-13 10:10:06.308130+00:00 [warning] <0.5711.0> Cluster minority/secondary status detected - awaiting recovery"
+        },
+        {
+          "container": "rabbit3",
+          "ts": 1794564606.313444,
+          "line": "2026-11-13 10:10:06.313444+00:00 [warning] <0.5711.0> Cluster minority/secondary status detected - awaiting recovery"
+        }
+      ],
+      "partition_log": [
+        {
+          "container": "rabbit3",
+          "ts": 1794564630.41829,
+          "line": "2026-11-13 10:10:30.418290+00:00 [error] <0.8333.0> Mnesia(rabbit@rabbit3): ** ERROR ** mnesia_event got {inconsistent_database, starting_partitioned_network, rabbit@rabbit1}"
+        },
+        {
+          "container": "rabbit3",
+          "ts": 1794564630.418389,
+          "line": "2026-11-13 10:10:30.418389+00:00 [error] <0.8333.0> Mnesia(rabbit@rabbit3): ** ERROR ** mnesia_event got {inconsistent_database, starting_partitioned_network, rabbit@rabbit2}"
+        }
+      ]
+    },
+    "classification": "pause_minority_confirmed",
+    "pause_minority_tested": true,
+    "leader_elections": [
+      {
+        "node": "rabbit1",
+        "ts": 1794564546.815967,
+        "term": 11,
+        "after_fault_s": 8.376
+      }
+    ],
+    "term_before": 10,
+    "term_after": 11,
+    "election_occurred": true
+  },
+  "errors": [],
+  "queue_after": {
+    "ts": 1794564670.1786213,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit1",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "workload": {
+    "run_tag": "r1408529dcd",
+    "producers": {
+      "r1408529dcd-p1": 12000
+    },
+    "consumers": [
+      "r1408529dcd-c1",
+      "r1408529dcd-c2"
+    ],
+    "rate_per_producer": 100.0,
+    "payload_bytes": 100,
+    "prefetch": 100,
+    "work_ms": 2,
+    "consumer_idle_timeout": 30.0,
+    "started_at": 1794564532.9378452,
+    "drain": {
+      "drained": true,
+      "waited_s": 6.828,
+      "stable_zero_required_s": 6.0,
+      "last_queue": {
+        "ts": 1794564668.445877,
+        "observer": "rabbit1",
+        "ok": true,
+        "messages": 0,
+        "ready": 0,
+        "unacked": 0,
+        "leader": "rabbit1",
+        "members": [
+          "rabbit1",
+          "rabbit2",
+          "rabbit3"
+        ]
+      },
+      "consumers_alive": 2
+    },
+    "processes": [
+      {
+        "name": "r1408529dcd-p1",
+        "role": "producer",
+        "pid": 178697,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": null,
+        "forced": false
+      },
+      {
+        "name": "r1408529dcd-c1",
+        "role": "consumer",
+        "pid": 178687,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": "sigint",
+        "forced": false
+      },
+      {
+        "name": "r1408529dcd-c2",
+        "role": "consumer",
+        "pid": 178688,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": "sigint",
+        "forced": false
+      }
+    ]
+  }
+}

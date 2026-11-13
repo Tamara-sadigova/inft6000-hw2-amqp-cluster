@@ -37,7 +37,6 @@ EXIT = {"PASS": 0, "FAIL": 1, "INCONCLUSIVE": 3}
 
 
 def run_validate(run_dir: Path) -> dict | None:
-    """Independent cross-check with Part B's validate.py (it counts consume, not ack)."""
     log_dir = run_dir / "logs"
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / "validate.json"
@@ -56,11 +55,6 @@ def _summary_for(log_path: Path) -> Path:
 
 
 def check_log_completeness(run_dir: Path) -> list[str]:
-    """Each client writes <log>-summary.json only AFTER closing (flushing) its event log.
-
-    A missing summary means the client did not exit cleanly; a count mismatch
-    means the event log is truncated. Either way the log cannot be trusted.
-    """
     problems = []
     for path in iter_log_files(run_dir):
         summary_path = _summary_for(path)
@@ -91,7 +85,7 @@ def analyse_logs(run_dir: Path, expected_producers: set[str] | None):
     sent = defaultdict(set)
     consumed = defaultdict(Counter)
     acked = defaultdict(set)
-    first_deliveries = []  # (ts, consumer_id, producer_id, seq)
+    first_deliveries = []
     foreign = 0
 
     for path in iter_log_files(run_dir, "producer"):
@@ -124,7 +118,7 @@ def analyse_logs(run_dir: Path, expected_producers: set[str] | None):
     consumes.sort(key=lambda r: r.get("ts") or 0)
 
     reordered = 0
-    highest = defaultdict(int)  # (consumer, producer) -> highest first-delivery seq seen
+    highest = defaultdict(int)
     for rec in consumes:
         pid, seq, cid = rec["producer_id"], rec["seq"], rec.get("consumer_id")
         consumed[pid][seq] += 1
@@ -159,7 +153,7 @@ def analyse_logs(run_dir: Path, expected_producers: set[str] | None):
 
 def verify(run_dir: Path) -> dict:
     meta = read_meta(run_dir)
-    reasons: list[str] = []      # anything here downgrades PASS to INCONCLUSIVE
+    reasons: list[str] = []
     warnings: list[str] = []
 
     if not any(iter_log_files(run_dir)):
@@ -169,10 +163,8 @@ def verify(run_dir: Path) -> dict:
     expected = set((meta or {}).get("workload", {}).get("producers", {}) or {})
     streams, totals = analyse_logs(run_dir, expected or None)
 
-    # 1. Log completeness (summary present and consistent with the event log).
     reasons += check_log_completeness(run_dir)
 
-    # 2. Run metadata: queue state before/after, process exits, completeness, fault.
     if meta is None:
         reasons.append("no run_meta.json: queue state before/after was not recorded and producer ids "
                        "may not be run-unique (run predates the current harness)")
@@ -209,7 +201,6 @@ def verify(run_dir: Path) -> dict:
         if meta.get("errors"):
             reasons += [f"harness error: {e}" for e in meta["errors"]]
 
-    # 3. Message-level checks.
     if totals["confirmed"] == 0:
         reasons.append("no publisher-confirmed messages")
     if totals["consumed_not_acked"]:
@@ -224,7 +215,6 @@ def verify(run_dir: Path) -> dict:
     if totals["duplicates"]:
         warnings.append(f"{totals['duplicates']} duplicate deliveries (at-least-once redelivery; not a loss)")
 
-    # 4. Cross-check with Part B's validate.py.
     v = run_validate(run_dir)
     if v is None or "error" in v:
         warnings.append(f"validate.py cross-check unavailable: {v and v.get('error')}")

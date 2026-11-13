@@ -1,0 +1,178 @@
+{
+  "run_dir": "/home/ravan/VsCode/inft6000-hw2-amqp-cluster/benchmarks/results/metrics/loadtest-20261113-144129",
+  "run_id": "loadtest-20261113-144129",
+  "run_start_ts": 1794566490.171623,
+  "duration_s": 6.048,
+  "publish": {
+    "sent_attempts": 2000,
+    "confirmed": 2000,
+    "nacked_or_failed": 0,
+    "window_s": 6.048,
+    "throughput_msg_s": 330.69,
+    "confirm_latency_ms": {
+      "count": 2000,
+      "p50": 3.035,
+      "p95": 4.719,
+      "p99": 5.365,
+      "min": 1.311,
+      "max": 24.102,
+      "mean": 2.979
+    }
+  },
+  "consume": {
+    "consumed_events": 2000,
+    "consumed_unique": 2000,
+    "acked_events": 2000,
+    "acked_unique": 2000,
+    "redelivered": 0,
+    "rejected_malformed": 0,
+    "window_s": 6.037,
+    "throughput_msg_s": 331.27,
+    "end_to_end_latency_ms": {
+      "count": 2000,
+      "p50": 3.17,
+      "p95": 4.853,
+      "p99": 5.515,
+      "min": 1.431,
+      "max": 24.68,
+      "mean": 3.128
+    }
+  },
+  "per_producer": {
+    "r1441298b5e-p1": {
+      "sent": 2000,
+      "confirmed": 2000,
+      "nacked": 0,
+      "nodes": [
+        "localhost:5673"
+      ],
+      "largest_confirm_gap": {
+        "gap_s": 0.024,
+        "from_rel": 5.829,
+        "to_rel": 5.853,
+        "from_ts": 1794566496.000565,
+        "to_ts": 1794566496.024707
+      }
+    }
+  },
+  "per_consumer": {
+    "r1441298b5e-c1": {
+      "consumed": 2000,
+      "acked": 2000,
+      "redelivered": 0,
+      "rejected": 0,
+      "nodes": [
+        "localhost:5674"
+      ]
+    }
+  },
+  "integrity": {
+    "unique_confirmed": 2000,
+    "unique_consumed": 2000,
+    "unique_acked": 2000,
+    "confirmed_not_consumed": 0,
+    "confirmed_not_acked": 0,
+    "acked_not_confirmed": 0,
+    "duplicate_consumed": 0,
+    "note": "Authoritative verdict is in verification.json (verify_zero_loss.py)."
+  },
+  "notes": [
+    "Producers use synchronous publisher confirms (one message in flight per producer), so publish throughput per producer is bounded by ~1/confirm latency; it is not the cluster's capacity.",
+    "Latency percentiles only include messages that were sent. Time a producer spent blocked during an outage is not spread over the messages it would have sent (coordinated omission): see 'gaps' / 'client_outage' for outage duration."
+  ],
+  "gaps": {
+    "confirm": [
+      {
+        "gap_s": 0.024,
+        "from_rel": 5.829,
+        "to_rel": 5.853,
+        "from_ts": 1794566496.000565,
+        "to_ts": 1794566496.024707
+      },
+      {
+        "gap_s": 0.014,
+        "from_rel": 4.268,
+        "to_rel": 4.283,
+        "from_ts": 1794566494.439936,
+        "to_ts": 1794566494.454172
+      },
+      {
+        "gap_s": 0.011,
+        "from_rel": 2.749,
+        "to_rel": 2.761,
+        "from_ts": 1794566492.920705,
+        "to_ts": 1794566492.932144
+      }
+    ],
+    "ack": [
+      {
+        "gap_s": 0.025,
+        "from_rel": 5.829,
+        "to_rel": 5.854,
+        "from_ts": 1794566496.000743,
+        "to_ts": 1794566496.025541
+      },
+      {
+        "gap_s": 0.014,
+        "from_rel": 4.269,
+        "to_rel": 4.283,
+        "from_ts": 1794566494.440449,
+        "to_ts": 1794566494.454256
+      },
+      {
+        "gap_s": 0.011,
+        "from_rel": 2.75,
+        "to_rel": 2.76,
+        "from_ts": 1794566492.921193,
+        "to_ts": 1794566492.932095
+      }
+    ],
+    "typical_confirm_interval_s": 0.0031
+  },
+  "events": [],
+  "timeline_bucket_s": 1.0,
+  "timeline": [
+    {
+      "t_rel": 0.0,
+      "confirmed": 334,
+      "consumed": 334,
+      "acked": 334
+    },
+    {
+      "t_rel": 1.0,
+      "confirmed": 328,
+      "consumed": 328,
+      "acked": 328
+    },
+    {
+      "t_rel": 2.0,
+      "confirmed": 328,
+      "consumed": 328,
+      "acked": 328
+    },
+    {
+      "t_rel": 3.0,
+      "confirmed": 354,
+      "consumed": 354,
+      "acked": 354
+    },
+    {
+      "t_rel": 4.0,
+      "confirmed": 338,
+      "consumed": 338,
+      "acked": 338
+    },
+    {
+      "t_rel": 5.0,
+      "confirmed": 302,
+      "consumed": 302,
+      "acked": 302
+    },
+    {
+      "t_rel": 6.0,
+      "confirmed": 16,
+      "consumed": 16,
+      "acked": 16
+    }
+  ]
+}

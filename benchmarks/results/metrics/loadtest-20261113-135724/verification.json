@@ -1,0 +1,77 @@
+{
+  "run_dir": "benchmarks/results/metrics/loadtest-20261113-135724",
+  "verdict": "PASS",
+  "integrity_ok": true,
+  "publisher_confirmed": 2000,
+  "consumer_consumed_unique": 2000,
+  "consumer_acked_unique": 2000,
+  "missing_count": 0,
+  "missing_sample": [],
+  "consumed_not_acked_count": 0,
+  "consumed_but_unconfirmed_count": 0,
+  "duplicate_deliveries": 0,
+  "reordered": 0,
+  "foreign_consumed": 0,
+  "queue_before": {
+    "ts": 1794563844.1399052,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit2",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "queue_after": {
+    "ts": 1794563860.134461,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit2",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "reasons": [],
+  "warnings": [],
+  "validate_py": {
+    "verdict": "PASS",
+    "totals": {
+      "confirmed": 2000,
+      "consumed_unique": 2000,
+      "lost": 0,
+      "duplicates": 0,
+      "reordered": 0,
+      "delivered_but_unconfirmed": 0,
+      "nack_or_failure_events": 0
+    },
+    "producer_reconnects": 0,
+    "consumer_reconnects": 0
+  },
+  "streams": {
+    "r135724bf70-p1": {
+      "confirmed": 2000,
+      "consumed_unique": 2000,
+      "acked_unique": 2000,
+      "missing_never_consumed": 0,
+      "missing_sample": [],
+      "consumed_not_acked": 0,
+      "consumed_not_acked_sample": [],
+      "consumed_but_unconfirmed": 0,
+      "duplicates": 0
+    }
+  },
+  "definitions": {
+    "missing_count": "confirmed but never consumed (candidate permanent loss)",
+    "consumed_not_acked_count": "confirmed and consumed but no ack logged",
+    "duplicate_deliveries": "extra deliveries of an already-consumed message"
+  }
+}

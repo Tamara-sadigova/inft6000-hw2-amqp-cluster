@@ -1,0 +1,180 @@
+{
+  "run_dir": "/home/ravan/VsCode/inft6000-hw2-amqp-cluster/benchmarks/results/metrics/node-kill-20261113-144410",
+  "verdict": "PASS",
+  "integrity_ok": true,
+  "publisher_confirmed": 5000,
+  "consumer_consumed_unique": 5000,
+  "consumer_acked_unique": 5000,
+  "missing_count": 0,
+  "missing_sample": [],
+  "consumed_not_acked_count": 0,
+  "consumed_but_unconfirmed_count": 0,
+  "duplicate_deliveries": 1,
+  "reordered": 0,
+  "foreign_consumed": 0,
+  "queue_before": {
+    "ts": 1794566650.1885293,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit1",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "queue_after": {
+    "ts": 1794566711.1828566,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit1",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "reasons": [],
+  "warnings": [
+    "1 duplicate deliveries (at-least-once redelivery; not a loss)"
+  ],
+  "validate_py": {
+    "verdict": "PASS",
+    "totals": {
+      "confirmed": 5000,
+      "consumed_unique": 5000,
+      "lost": 0,
+      "duplicates": 1,
+      "reordered": 0,
+      "delivered_but_unconfirmed": 0,
+      "nack_or_failure_events": 1
+    },
+    "producer_reconnects": 1,
+    "consumer_reconnects": 1
+  },
+  "streams": {
+    "r1444101571-p1": {
+      "confirmed": 5000,
+      "consumed_unique": 5000,
+      "acked_unique": 5000,
+      "missing_never_consumed": 0,
+      "missing_sample": [],
+      "consumed_not_acked": 0,
+      "consumed_not_acked_sample": [],
+      "consumed_but_unconfirmed": 0,
+      "duplicates": 1
+    }
+  },
+  "definitions": {
+    "missing_count": "confirmed but never consumed (candidate permanent loss)",
+    "consumed_not_acked_count": "confirmed and consumed but no ack logged",
+    "duplicate_deliveries": "extra deliveries of an already-consumed message"
+  },
+  "chaos": {
+    "node": "rabbit2",
+    "target_selection": "rabbit2",
+    "target_role": "follower",
+    "observer": "rabbit1",
+    "leader_before": {
+      "ts": 1794566650.821103,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit1",
+      "term": 11,
+      "members": {
+        "rabbit1": {
+          "state": "leader",
+          "term": 11
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 11
+        },
+        "rabbit3": {
+          "state": "follower",
+          "term": 11
+        }
+      }
+    },
+    "leader_during": {
+      "ts": 1794566657.1585348,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit1",
+      "term": 11,
+      "members": {
+        "rabbit1": {
+          "state": "leader",
+          "term": 11
+        },
+        "rabbit2": {
+          "state": [
+            "nodedown",
+            "rabbit@rabbit2"
+          ],
+          "term": ""
+        },
+        "rabbit3": {
+          "state": "follower",
+          "term": 11
+        }
+      }
+    },
+    "node_rejoin": {
+      "ok": true,
+      "rejoin_s": 6.111,
+      "polls": 2,
+      "leader": "rabbit1",
+      "term": 11
+    },
+    "leader_after": {
+      "ts": 1794566711.732959,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit1",
+      "term": 11,
+      "members": {
+        "rabbit1": {
+          "state": "leader",
+          "term": 11
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 11
+        },
+        "rabbit3": {
+          "state": "follower",
+          "term": 11
+        }
+      }
+    },
+    "leader_elections": [],
+    "election_occurred": false,
+    "term_before": 11,
+    "term_after": 11
+  },
+  "client_outage": {
+    "definition": "largest gap between consecutive events (all producers / all consumers merged) that ends after the fault was injected",
+    "fault_start_rel": 2.941,
+    "confirm": {
+      "gap_s": 0.024,
+      "from_rel": 3.084,
+      "to_rel": 3.108,
+      "from_ts": 1794566654.467509,
+      "to_ts": 1794566654.491116
+    },
+    "ack": {
+      "gap_s": 0.021,
+      "from_rel": 8.197,
+      "to_rel": 8.218,
+      "from_ts": 1794566659.580386,
+      "to_ts": 1794566659.601027
+    }
+  }
+}

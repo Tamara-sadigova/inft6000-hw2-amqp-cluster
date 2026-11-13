@@ -10,7 +10,6 @@ from run_utils import iter_log_files, read_jsonl, read_meta
 
 
 def percentile(values, pct):
-    """Linear-interpolation percentile (same as numpy's default 'linear' method)."""
     if not values:
         return None
     ordered = sorted(values)
@@ -44,11 +43,6 @@ def _window(first: float | None, last: float | None) -> float | None:
 
 
 def largest_gaps(ts: list[float], run_start: float, n: int = 3, after: float | None = None) -> list[dict]:
-    """Largest silences between consecutive events (sorted timestamps).
-
-    If `after` is given, only gaps that END after that time are considered,
-    i.e. silences that overlap or follow a fault.
-    """
     gaps = []
     for a, b in zip(ts, ts[1:]):
         if after is not None and b < after:
@@ -61,7 +55,6 @@ def largest_gaps(ts: list[float], run_start: float, n: int = 3, after: float | N
 
 def build_timeline(series: dict[str, list[float]], run_start: float, run_end: float,
                    bucket: float) -> list[dict]:
-    """Per-bucket event counts, with EVERY bucket from 0 to the end present (zeros included)."""
     n_buckets = int((run_end - run_start) / bucket) + 1
     rows = [{"t_rel": round(i * bucket, 3), **{k: 0 for k in series}} for i in range(n_buckets)]
     for key, ts_list in series.items():
@@ -140,9 +133,6 @@ def compute(run_dir: Path, bucket_seconds: float | None = None) -> dict:
     for lst in (sent_ts, confirm_ts, consume_ts, ack_ts):
         lst.sort()
 
-    # Separate windows: publish = first publish_sent -> last publish_confirmed,
-    # consume = first consume -> last ack. Using one shared window (as before)
-    # forced both rates to be equal whenever the counts were equal.
     pub_window = _window(sent_ts[0] if sent_ts else None, confirm_ts[-1] if confirm_ts else None)
     con_window = _window(consume_ts[0] if consume_ts else None, ack_ts[-1] if ack_ts else None)
     all_ts = [t for t in (sent_ts[:1] + consume_ts[:1]) if t is not None]
@@ -216,7 +206,6 @@ def compute(run_dir: Path, bucket_seconds: float | None = None) -> dict:
                 [b - a for a, b in zip(confirm_ts, confirm_ts[1:])]), 4) if len(confirm_ts) > 2 else None),
         }
 
-    # Fault markers + client-visible outage (only when the run recorded a fault time).
     events = []
     fault = meta.get("fault") or {}
     if run_start is not None:

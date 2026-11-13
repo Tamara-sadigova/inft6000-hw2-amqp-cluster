@@ -1,0 +1,487 @@
+{
+  "run_dir": "/home/ravan/VsCode/inft6000-hw2-amqp-cluster/benchmarks/results/metrics/node-kill-20261113-144410",
+  "run_id": "node-kill-20261113-144410",
+  "run_start_ts": 1794566651.383443,
+  "duration_s": 50.006,
+  "publish": {
+    "sent_attempts": 5001,
+    "confirmed": 5000,
+    "nacked_or_failed": 1,
+    "window_s": 50.003,
+    "throughput_msg_s": 99.99,
+    "confirm_latency_ms": {
+      "count": 5000,
+      "p50": 2.434,
+      "p95": 4.581,
+      "p99": 7.178,
+      "min": 1.49,
+      "max": 20.197,
+      "mean": 2.754
+    }
+  },
+  "consume": {
+    "consumed_events": 5001,
+    "consumed_unique": 5000,
+    "acked_events": 5001,
+    "acked_unique": 5000,
+    "redelivered": 0,
+    "rejected_malformed": 0,
+    "window_s": 49.997,
+    "throughput_msg_s": 100.01,
+    "end_to_end_latency_ms": {
+      "count": 5001,
+      "p50": 2.643,
+      "p95": 4.968,
+      "p99": 7.601,
+      "min": 1.646,
+      "max": 20.381,
+      "mean": 3.001
+    }
+  },
+  "per_producer": {
+    "r1444101571-p1": {
+      "sent": 5001,
+      "confirmed": 5000,
+      "nacked": 1,
+      "nodes": [
+        "localhost:5673",
+        "localhost:5674"
+      ],
+      "largest_confirm_gap": {
+        "gap_s": 0.024,
+        "from_rel": 3.084,
+        "to_rel": 3.108,
+        "from_ts": 1794566654.467509,
+        "to_ts": 1794566654.491116
+      }
+    }
+  },
+  "per_consumer": {
+    "r1444101571-c1": {
+      "consumed": 2490,
+      "acked": 2490,
+      "redelivered": 0,
+      "rejected": 0,
+      "nodes": [
+        "localhost:5673",
+        "localhost:5674"
+      ]
+    },
+    "r1444101571-c2": {
+      "consumed": 2511,
+      "acked": 2511,
+      "redelivered": 0,
+      "rejected": 0,
+      "nodes": [
+        "localhost:5674"
+      ]
+    }
+  },
+  "integrity": {
+    "unique_confirmed": 5000,
+    "unique_consumed": 5000,
+    "unique_acked": 5000,
+    "confirmed_not_consumed": 0,
+    "confirmed_not_acked": 0,
+    "acked_not_confirmed": 0,
+    "duplicate_consumed": 1,
+    "note": "Authoritative verdict is in verification.json (verify_zero_loss.py)."
+  },
+  "notes": [
+    "Producers use synchronous publisher confirms (one message in flight per producer), so publish throughput per producer is bounded by ~1/confirm latency; it is not the cluster's capacity.",
+    "Latency percentiles only include messages that were sent. Time a producer spent blocked during an outage is not spread over the messages it would have sent (coordinated omission): see 'gaps' / 'client_outage' for outage duration."
+  ],
+  "gaps": {
+    "confirm": [
+      {
+        "gap_s": 0.024,
+        "from_rel": 3.084,
+        "to_rel": 3.108,
+        "from_ts": 1794566654.467509,
+        "to_ts": 1794566654.491116
+      },
+      {
+        "gap_s": 0.021,
+        "from_rel": 8.194,
+        "to_rel": 8.215,
+        "from_ts": 1794566659.577699,
+        "to_ts": 1794566659.598465
+      },
+      {
+        "gap_s": 0.02,
+        "from_rel": 37.504,
+        "to_rel": 37.524,
+        "from_ts": 1794566688.887212,
+        "to_ts": 1794566688.907542
+      }
+    ],
+    "ack": [
+      {
+        "gap_s": 0.021,
+        "from_rel": 8.197,
+        "to_rel": 8.218,
+        "from_ts": 1794566659.580386,
+        "to_ts": 1794566659.601027
+      },
+      {
+        "gap_s": 0.02,
+        "from_rel": 12.764,
+        "to_rel": 12.784,
+        "from_ts": 1794566664.147434,
+        "to_ts": 1794566664.167764
+      },
+      {
+        "gap_s": 0.02,
+        "from_rel": 37.506,
+        "to_rel": 37.526,
+        "from_ts": 1794566688.889556,
+        "to_ts": 1794566688.909793
+      }
+    ],
+    "typical_confirm_interval_s": 0.01
+  },
+  "events": [
+    {
+      "label": "stop rabbit2",
+      "ts": 1794566654.3246796,
+      "t_rel": 2.941
+    },
+    {
+      "label": "start rabbit2",
+      "ts": 1794566660.9298728,
+      "t_rel": 9.546
+    },
+    {
+      "label": "cluster+quorum healthy",
+      "ts": 1794566667.0408728,
+      "t_rel": 15.657
+    }
+  ],
+  "client_outage": {
+    "definition": "largest gap between consecutive events (all producers / all consumers merged) that ends after the fault was injected",
+    "fault_start_rel": 2.941,
+    "confirm": {
+      "gap_s": 0.024,
+      "from_rel": 3.084,
+      "to_rel": 3.108,
+      "from_ts": 1794566654.467509,
+      "to_ts": 1794566654.491116
+    },
+    "ack": {
+      "gap_s": 0.021,
+      "from_rel": 8.197,
+      "to_rel": 8.218,
+      "from_ts": 1794566659.580386,
+      "to_ts": 1794566659.601027
+    }
+  },
+  "timeline_bucket_s": 1.0,
+  "timeline": [
+    {
+      "t_rel": 0.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 1.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 2.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 3.0,
+      "confirmed": 99,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 4.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 5.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 6.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 7.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 8.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 9.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 10.0,
+      "confirmed": 99,
+      "consumed": 99,
+      "acked": 99
+    },
+    {
+      "t_rel": 11.0,
+      "confirmed": 101,
+      "consumed": 101,
+      "acked": 101
+    },
+    {
+      "t_rel": 12.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 13.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 14.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 15.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 16.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 17.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 18.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 19.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 20.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 21.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 22.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 23.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 24.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 25.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 26.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 27.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 28.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 29.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 30.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 31.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 32.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 33.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 34.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 35.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 36.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 37.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 38.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 39.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 40.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 41.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 42.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 43.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 44.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 45.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 46.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 47.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 48.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 49.0,
+      "confirmed": 100,
+      "consumed": 100,
+      "acked": 100
+    },
+    {
+      "t_rel": 50.0,
+      "confirmed": 1,
+      "consumed": 1,
+      "acked": 1
+    }
+  ]
+}

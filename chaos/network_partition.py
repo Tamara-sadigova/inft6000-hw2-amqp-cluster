@@ -62,14 +62,12 @@ def reconnect(node: str, aliases: list[str], attempts: int = 3) -> dict:
 
 
 def sample(target: str, observer: str) -> dict:
-    """One observation of both sides of the partition."""
     s = {"ts": time.time()}
     st = cluster_status(observer, timeout=10)
     s["majority_running_nodes"] = sorted(_node_names(st)) if st.get("ok") else None
     s["majority_partitions"] = _partitions(st) if st.get("ok") else None
     ls = leader_snapshot(observer)
     s["leader"], s["term"] = ls.get("leader"), ls.get("term")
-    # docker exec does not need the network, so the isolated node can still be asked.
     proc = run_docker("exec", target, "rabbitmq-diagnostics", "-q", "check_running",
                       check=False, timeout=8)
     s["target_rabbit_running"] = {0: True, 124: None}.get(proc.returncode, False)
@@ -77,8 +75,6 @@ def sample(target: str, observer: str) -> dict:
 
 
 def sampler(stop: threading.Event, samples: list, target: str, observer: str, interval: float) -> None:
-    """Background sampling, so slow rabbitmqctl calls (they block while a peer is
-    unreachable) can never stretch the partition beyond the requested time."""
     while not stop.is_set():
         started = time.time()
         s = sample(target, observer)

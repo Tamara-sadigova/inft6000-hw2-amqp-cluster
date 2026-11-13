@@ -15,7 +15,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CLIENTS_DIR = REPO_ROOT / "clients"
 BENCH_DIR = REPO_ROOT / "benchmarks"
-# HW2_RESULTS_DIR lets test runs write somewhere other than the repo.
 RESULTS_DIR = Path(os.getenv("HW2_RESULTS_DIR") or (BENCH_DIR / "results"))
 
 NODES = os.getenv("HW2_NODES", "localhost:5672,localhost:5673,localhost:5674")
@@ -28,8 +27,6 @@ NETWORK = "hw2-net"
 META_FILE = "run_meta.json"
 
 
-# --------------------------------------------------------------------------- run dirs
-
 def new_run_dir(kind: str) -> Path:
     ts = time.strftime("%Y%m%d-%H%M%S")
     d = RESULTS_DIR / "metrics" / f"{kind}-{ts}"
@@ -38,13 +35,6 @@ def new_run_dir(kind: str) -> Path:
 
 
 def new_run_tag() -> str:
-    """Short unique tag put into every producer_id of a run.
-
-    Producer ids used to be a fixed 'p1', 'p2', ... with seq restarting at 1,
-    so a message left in the queue by an earlier run was indistinguishable
-    from a message of the current run. With a per-run tag, leftovers show up
-    as 'foreign' messages instead of masking a loss.
-    """
     return f"r{time.strftime('%H%M%S')}{secrets.token_hex(2)}"
 
 
@@ -65,12 +55,9 @@ def read_meta(run_dir: Path) -> dict | None:
 
 
 def split_count(total: int, parts: int) -> list[int]:
-    """Split total into `parts` positive counts that sum exactly to total."""
     base, rem = divmod(total, parts)
     return [base + (1 if i < rem else 0) for i in range(parts)]
 
-
-# --------------------------------------------------------------------------- client processes
 
 def _client(script: str, *args: str) -> list[str]:
     return [sys.executable, str(CLIENTS_DIR / script), *args]
@@ -98,7 +85,6 @@ class Proc:
         return self.proc.poll() is None
 
     def wait(self, timeout: float | None = None) -> int | None:
-        """Return the exit code, or None if still running after timeout."""
         try:
             return self.proc.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -106,13 +92,6 @@ class Proc:
             return None
 
     def stop(self, grace: float = 15.0) -> None:
-        """Stop the client so that it still flushes its log and summary.
-
-        Both clients set their stop event on SIGINT and then close the event
-        log and write the -summary.json file. The producer has no SIGTERM
-        handler, so SIGTERM/SIGKILL are only a last resort and mark the run
-        as forced (its log may be incomplete).
-        """
         if not self.alive():
             return
         self.stop_method = "sigint"
@@ -182,14 +161,6 @@ def start_consumer(run_dir: Path, *, consumer_id="c1", threads=1, prefetch=100,
 
 
 class Workload:
-    """Producer + consumer processes with a controlled lifecycle.
-
-    Lifecycle: start consumers -> start producers -> wait for producers
-    (bounded) -> wait until the broker queue is empty -> stop consumers
-    with SIGINT. The harness, not the consumer idle timeout, decides when
-    consumers stop, so a long outage cannot make them quit before the
-    queue has drained.
-    """
 
     def __init__(self, run_dir: Path, *, run_tag: str, total_count: int, producers: int,
                  rate: float, size: int, consumers: int, prefetch: int, work_ms: float,
@@ -217,7 +188,7 @@ class Workload:
     def expected_publish_seconds(self) -> float:
         if self.rate > 0:
             return max(self.counts) / self.rate
-        return max(self.counts) / 200.0  # conservative guess for an unthrottled producer
+        return max(self.counts) / 200.0
 
     def start(self) -> None:
         self.started_at = time.time()
@@ -234,7 +205,6 @@ class Workload:
         ]
 
     def wait_producers(self, timeout: float) -> bool:
-        """Wait for all producers against ONE overall deadline. Returns True if all exited."""
         deadline = time.time() + timeout
         ok = True
         for p in self.producers:
@@ -247,16 +217,6 @@ class Workload:
 
     def wait_drained(self, timeout: float, observer: str = "rabbit1", poll: float = 1.0,
                      stable_s: float = 6.0) -> dict:
-        """Wait until the broker reports 0 messages (ready + unacked) for `stable_s` seconds.
-
-        Call this only after all producers have exited: from then on the
-        depth can only go down. The count from rabbitmqctl is refreshed
-        periodically (collect_statistics_interval, 5 s by default), so a
-        single '0' may be stale; a 0 that persists for longer than one
-        refresh interval reflects a snapshot taken after publishing stopped.
-        (The client logs cannot be used for this: they are only flushed when
-        a later event is written or the client exits.)
-        """
         t0 = time.time()
         zero_since = None
         drained = False
@@ -310,14 +270,11 @@ class Workload:
         }
 
 
-# --------------------------------------------------------------------------- docker / rabbitmqctl
-
 class DockerError(RuntimeError):
     pass
 
 
 def run_docker(*args: str, check: bool = True, timeout: float = 30) -> subprocess.CompletedProcess:
-    """Run a docker command. A timeout is reported as returncode 124 (or raised if check)."""
     try:
         proc = subprocess.run(
             ["docker", *args], capture_output=True, text=True, timeout=timeout
@@ -352,14 +309,12 @@ def queue_stats(container: str = "rabbit1", timeout: float = 15) -> dict:
 
 
 def short_node(name: str | None) -> str | None:
-    """'rabbit@rabbit2' -> 'rabbit2' (container name == hostname in docker-compose.yml)."""
     if not name:
         return None
     return name.split("@", 1)[1] if "@" in name else name
 
 
 def queue_info(container: str = "rabbit1", timeout: float = 15) -> dict:
-    """Depth, leader and members of hw2.orders as seen from `container`."""
     r = _exec_json(container, "rabbitmqctl", "list_queues", "name", "leader", "members",
                    "messages", "messages_ready", "messages_unacknowledged", timeout=timeout)
     out = {"ts": time.time(), "observer": container, "ok": False}
@@ -378,7 +333,6 @@ def queue_info(container: str = "rabbit1", timeout: float = 15) -> dict:
 
 
 def quorum_status(container: str = "rabbit1", timeout: float = 15) -> dict:
-    """Raft view of hw2.orders: leader, highest term and per-member state."""
     r = _exec_json(container, "rabbitmq-queues", "quorum_status", QUEUE, timeout=timeout)
     out = {"ts": time.time(), "observer": container, "ok": False}
     if not r["ok"]:
@@ -403,7 +357,6 @@ def quorum_status(container: str = "rabbit1", timeout: float = 15) -> dict:
 
 
 def observer_for(target: str | None) -> str:
-    """A node to run rabbitmqctl on that is not the one under test."""
     for c in CONTAINERS:
         if c != target:
             return c
@@ -418,7 +371,6 @@ def container_running(container: str) -> bool | None:
 
 
 def leader_snapshot(container: str) -> dict:
-    """Compact leader/term record for run metadata."""
     qs = quorum_status(container)
     if not qs.get("ok"):
         return {"ts": qs["ts"], "observer": container, "ok": False, "error": qs.get("error")}
@@ -449,15 +401,12 @@ def network_aliases(container: str, network: str = NETWORK) -> list[str]:
     return sorted({a for a in aliases if a})
 
 
-# --------------------------------------------------------------------------- broker logs
-
 _ANSI = re.compile(r"\x1b\[[0-9;]*m")
 _LOG_TS = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)([+-]\d{2}:\d{2})")
 
 
 def broker_log(container: str, since: float, until: float | None = None,
                patterns: list[str] | None = None) -> list[dict]:
-    """Broker log lines in [since, until] (unix seconds), optionally filtered by regex."""
     args = ["logs", "--since", f"{since:.3f}"]
     if until is not None:
         args += ["--until", f"{until:.3f}"]
@@ -480,7 +429,6 @@ def broker_log(container: str, since: float, until: float | None = None,
 
 
 def leader_elections(since: float, until: float | None = None) -> list[dict]:
-    """'candidate -> leader' events for hw2.orders on any node, oldest first."""
     pat = rf"queue '{re.escape(QUEUE)}' .*candidate -> leader in term: (\d+)"
     events = []
     for c in CONTAINERS:
@@ -489,8 +437,6 @@ def leader_elections(since: float, until: float | None = None) -> list[dict]:
             events.append({"node": c, "ts": e["ts"], "term": int(m.group(1)) if m else None})
     return sorted(events, key=lambda e: e["ts"] or 0)
 
-
-# --------------------------------------------------------------------------- jsonl helpers
 
 def read_jsonl(path: Path):
     if not path.exists():
@@ -521,7 +467,6 @@ def auto_timeout(workload: "Workload", extra: float = 120.0) -> float:
 
 def finalize_run(run_dir: Path, meta: dict, bucket_seconds: float = 1.0,
                  make_plots: bool = True) -> tuple[dict, dict, list[Path]]:
-    """Write run_meta.json, then metrics.json, verification.json and graphs."""
     import analyze
     import plot as plotmod
     import verify_zero_loss
@@ -539,6 +484,6 @@ def finalize_run(run_dir: Path, meta: dict, bucket_seconds: float = 1.0,
     if make_plots:
         try:
             graphs = plotmod.plot_all(metrics, RESULTS_DIR / "graphs")
-        except Exception as exc:  # plotting must never hide a verdict
+        except Exception as exc:
             verification.setdefault("warnings", []).append(f"plotting failed: {exc!r}")
     return metrics, verification, graphs

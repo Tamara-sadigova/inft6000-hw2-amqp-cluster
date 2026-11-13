@@ -1,0 +1,101 @@
+{
+  "kind": "loadtest",
+  "args": {
+    "total_count": 2000,
+    "threads": 1,
+    "rate": 0,
+    "size": 100,
+    "consumers": 1,
+    "prefetch": 100,
+    "work_ms": 0,
+    "idle_timeout": 10.0,
+    "bucket_seconds": 1.0,
+    "timeout": 0,
+    "drain_timeout": 120,
+    "no_plot": false
+  },
+  "queue_before": {
+    "ts": 1794566489.6127152,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit1",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "errors": [],
+  "queue_after": {
+    "ts": 1794566505.8187554,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit1",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "workload": {
+    "run_tag": "r1441298b5e",
+    "producers": {
+      "r1441298b5e-p1": 2000
+    },
+    "consumers": [
+      "r1441298b5e-c1"
+    ],
+    "rate_per_producer": 0,
+    "payload_bytes": 100,
+    "prefetch": 100,
+    "work_ms": 0,
+    "consumer_idle_timeout": 10.0,
+    "started_at": 1794566489.6130474,
+    "drain": {
+      "drained": true,
+      "waited_s": 8.426,
+      "stable_zero_required_s": 6.0,
+      "last_queue": {
+        "ts": 1794566504.8148053,
+        "observer": "rabbit1",
+        "ok": true,
+        "messages": 0,
+        "ready": 0,
+        "unacked": 0,
+        "leader": "rabbit1",
+        "members": [
+          "rabbit1",
+          "rabbit2",
+          "rabbit3"
+        ]
+      },
+      "consumers_alive": 1
+    },
+    "processes": [
+      {
+        "name": "r1441298b5e-p1",
+        "role": "producer",
+        "pid": 220646,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": null,
+        "forced": false
+      },
+      {
+        "name": "r1441298b5e-c1",
+        "role": "consumer",
+        "pid": 220608,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": "sigint",
+        "forced": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "run_dir": "/home/ravan/VsCode/inft6000-hw2-amqp-cluster/benchmarks/results/metrics/partition-20261113-140126",
+  "verdict": "PASS",
+  "integrity_ok": true,
+  "publisher_confirmed": 5000,
+  "consumer_consumed_unique": 5000,
+  "consumer_acked_unique": 5000,
+  "missing_count": 0,
+  "missing_sample": [],
+  "consumed_not_acked_count": 0,
+  "consumed_but_unconfirmed_count": 0,
+  "duplicate_deliveries": 0,
+  "reordered": 0,
+  "foreign_consumed": 0,
+  "queue_before": {
+    "ts": 1794564085.1335616,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit3",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "queue_after": {
+    "ts": 1794564158.8564508,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit3",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "reasons": [],
+  "warnings": [],
+  "validate_py": {
+    "verdict": "PASS",
+    "totals": {
+      "confirmed": 5000,
+      "consumed_unique": 5000,
+      "lost": 0,
+      "duplicates": 0,
+      "reordered": 0,
+      "delivered_but_unconfirmed": 0,
+      "nack_or_failure_events": 0
+    },
+    "producer_reconnects": 0,
+    "consumer_reconnects": 1
+  },
+  "streams": {
+    "r1401264cb3-p1": {
+      "confirmed": 5000,
+      "consumed_unique": 5000,
+      "acked_unique": 5000,
+      "missing_never_consumed": 0,
+      "missing_sample": [],
+      "consumed_not_acked": 0,
+      "consumed_not_acked_sample": [],
+      "consumed_but_unconfirmed": 0,
+      "duplicates": 0
+    }
+  },
+  "definitions": {
+    "missing_count": "confirmed but never consumed (candidate permanent loss)",
+    "consumed_not_acked_count": "confirmed and consumed but no ack logged",
+    "duplicate_deliveries": "extra deliveries of an already-consumed message"
+  },
+  "chaos": {
+    "node": "rabbit3",
+    "network": "hw2-net",
+    "target_selection": "rabbit3",
+    "target_role": "leader",
+    "observer": "rabbit1",
+    "net_ticktime_s": 60,
+    "partition_seconds_requested": 8.0,
+    "leader_before": {
+      "ts": 1794564085.6909344,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit3",
+      "term": 10,
+      "members": {
+        "rabbit1": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit3": {
+          "state": "leader",
+          "term": 10
+        }
+      }
+    },
+    "samples": [
+      {
+        "ts": 1794564092.4588158,
+        "majority_running_nodes": null,
+        "majority_partitions": null,
+        "leader": "rabbit3",
+        "term": 10,
+        "target_rabbit_running": true,
+        "started_ts": 1794564092.4588149,
+        "done_ts": 1794564106.132044,
+        "completed_after_reconnect": true
+      }
+    ],
+    "partition_seconds_actual": 8.604,
+    "node_rejoin": {
+      "ok": true,
+      "rejoin_s": 7.318,
+      "polls": 1,
+      "leader": "rabbit3",
+      "term": 10
+    },
+    "leader_after": {
+      "ts": 1794564159.3737473,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit3",
+      "term": 10,
+      "members": {
+        "rabbit1": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit3": {
+          "state": "leader",
+          "term": 10
+        }
+      }
+    },
+    "broker_evidence": {
+      "majority_logged_target_down": [],
+      "target_logged_peers_down": [],
+      "pause_minority_log": [],
+      "partition_log": []
+    },
+    "classification": "client_interruption_only",
+    "pause_minority_tested": false,
+    "leader_elections": [],
+    "term_before": 10,
+    "term_after": 10,
+    "election_occurred": false
+  },
+  "client_outage": {
+    "definition": "largest gap between consecutive events (all producers / all consumers merged) that ends after the fault was injected",
+    "fault_start_rel": 4.931,
+    "confirm": {
+      "gap_s": 13.263,
+      "from_rel": 5.383,
+      "to_rel": 18.646,
+      "from_ts": 1794564092.271924,
+      "to_ts": 1794564105.534859
+    },
+    "ack": {
+      "gap_s": 13.265,
+      "from_rel": 5.385,
+      "to_rel": 18.65,
+      "from_ts": 1794564092.274404,
+      "to_ts": 1794564105.539066
+    }
+  }
+}

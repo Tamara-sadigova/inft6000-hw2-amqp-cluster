@@ -31,7 +31,6 @@ def log(msg: str) -> None:
 
 
 def restore_node(node: str, attempts: int = 3) -> dict:
-    """Start the node again, retrying; confirm via docker inspect."""
     errors = []
     for i in range(attempts):
         proc = run_docker("start", node, check=False, timeout=60)
@@ -43,7 +42,6 @@ def restore_node(node: str, attempts: int = 3) -> dict:
 
 
 def wait_for_new_leader(observer: str, exclude: str, timeout: float = 20) -> dict:
-    """Poll the surviving side until it reports a leader other than `exclude`."""
     t0 = time.time()
     snap = leader_snapshot(observer)
     while time.time() - t0 < timeout:
@@ -169,7 +167,6 @@ def main():
             events.append({"label": f"new leader {elections[0]['node']} (term {elections[0]['term']})",
                            "ts": elections[0]["ts"]})
     lb, la = leader_before.get("term"), chaos["leader_after"].get("term")
-    # A Raft term increase means at least one election happened.
     chaos["election_occurred"] = (la > lb) if (lb is not None and la is not None) else None
     chaos["term_before"], chaos["term_after"] = lb, la
     fault["recorded_events"] = events

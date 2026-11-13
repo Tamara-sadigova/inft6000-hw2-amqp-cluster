@@ -1,4 +1,3 @@
-"""Cluster health check via docker exec + rabbitmqctl / rabbitmq-queues."""
 from __future__ import annotations
 
 import argparse
@@ -50,7 +49,6 @@ def _partitions(status: dict) -> list:
 
 
 def cluster_healthy(status: dict) -> bool:
-    """Erlang-level health: all nodes running and no partition recorded."""
     if not status.get("ok"):
         return False
     if _partitions(status):
@@ -59,7 +57,6 @@ def cluster_healthy(status: dict) -> bool:
 
 
 def quorum_healthy(qs: dict) -> bool:
-    """Queue-level health: every node is a voter in a known Raft state, one leader, one term."""
     if not qs.get("ok"):
         return False
     members = {m["node"]: m for m in qs["members"]}
@@ -94,12 +91,6 @@ def check(container: str = "rabbit1") -> dict:
 
 def wait_rejoined(t0: float, timeout: float, container: str = "rabbit1",
                   poll: float = 1.0) -> dict:
-    """Poll until the cluster AND the quorum queue are healthy.
-
-    Returns the elapsed time measured from t0 (pass the time the restore
-    command was issued) so the figure includes the restore command itself.
-    Resolution is bounded by `poll` plus the rabbitmqctl call time (~1 s).
-    """
     attempts = 0
     while time.time() - t0 < timeout:
         attempts += 1

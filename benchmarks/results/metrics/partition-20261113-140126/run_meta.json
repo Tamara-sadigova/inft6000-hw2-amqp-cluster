@@ -1,0 +1,227 @@
+{
+  "kind": "partition",
+  "args": {
+    "node": "rabbit3",
+    "total_count": 5000,
+    "threads": 1,
+    "rate": 100.0,
+    "consumers": 2,
+    "partition_after": 5.0,
+    "partition_seconds": 8.0,
+    "sample_interval": 2.0,
+    "recovery_timeout": 120,
+    "drain_timeout": 180,
+    "consumer_idle": 15.0,
+    "dry_run": false
+  },
+  "queue_before": {
+    "ts": 1794564085.1335616,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit3",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "events": [
+    {
+      "label": "disconnect rabbit3",
+      "ts": 1794564091.8198285
+    },
+    {
+      "label": "reconnect rabbit3",
+      "ts": 1794564101.0627449
+    },
+    {
+      "label": "cluster+quorum healthy",
+      "ts": 1794564107.7769618
+    }
+  ],
+  "fault": {
+    "type": "docker network disconnect hw2-net",
+    "target": "rabbit3",
+    "target_role": "leader",
+    "injected": true,
+    "start_ts": 1794564091.8198285,
+    "isolated_ts": 1794564092.458655,
+    "restore_issued_ts": 1794564100.4589617,
+    "reconnected_ts": 1794564101.0627449,
+    "restored": {
+      "ok": true,
+      "attempts": 1,
+      "aliases": [
+        "rabbit3"
+      ],
+      "errors": []
+    }
+  },
+  "chaos": {
+    "node": "rabbit3",
+    "network": "hw2-net",
+    "target_selection": "rabbit3",
+    "target_role": "leader",
+    "observer": "rabbit1",
+    "net_ticktime_s": 60,
+    "partition_seconds_requested": 8.0,
+    "leader_before": {
+      "ts": 1794564085.6909344,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit3",
+      "term": 10,
+      "members": {
+        "rabbit1": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit3": {
+          "state": "leader",
+          "term": 10
+        }
+      }
+    },
+    "samples": [
+      {
+        "ts": 1794564092.4588158,
+        "majority_running_nodes": null,
+        "majority_partitions": null,
+        "leader": "rabbit3",
+        "term": 10,
+        "target_rabbit_running": true,
+        "started_ts": 1794564092.4588149,
+        "done_ts": 1794564106.132044,
+        "completed_after_reconnect": true
+      }
+    ],
+    "partition_seconds_actual": 8.604,
+    "node_rejoin": {
+      "ok": true,
+      "rejoin_s": 7.318,
+      "polls": 1,
+      "leader": "rabbit3",
+      "term": 10
+    },
+    "leader_after": {
+      "ts": 1794564159.3737473,
+      "observer": "rabbit1",
+      "ok": true,
+      "leader": "rabbit3",
+      "term": 10,
+      "members": {
+        "rabbit1": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit2": {
+          "state": "follower",
+          "term": 10
+        },
+        "rabbit3": {
+          "state": "leader",
+          "term": 10
+        }
+      }
+    },
+    "broker_evidence": {
+      "majority_logged_target_down": [],
+      "target_logged_peers_down": [],
+      "pause_minority_log": [],
+      "partition_log": []
+    },
+    "classification": "client_interruption_only",
+    "pause_minority_tested": false,
+    "leader_elections": [],
+    "term_before": 10,
+    "term_after": 10,
+    "election_occurred": false
+  },
+  "errors": [],
+  "queue_after": {
+    "ts": 1794564158.8564508,
+    "observer": "rabbit1",
+    "ok": true,
+    "messages": 0,
+    "ready": 0,
+    "unacked": 0,
+    "leader": "rabbit3",
+    "members": [
+      "rabbit1",
+      "rabbit2",
+      "rabbit3"
+    ]
+  },
+  "workload": {
+    "run_tag": "r1401264cb3",
+    "producers": {
+      "r1401264cb3-p1": 5000
+    },
+    "consumers": [
+      "r1401264cb3-c1",
+      "r1401264cb3-c2"
+    ],
+    "rate_per_producer": 100.0,
+    "payload_bytes": 100,
+    "prefetch": 100,
+    "work_ms": 2,
+    "consumer_idle_timeout": 15.0,
+    "started_at": 1794564086.31786,
+    "drain": {
+      "drained": true,
+      "waited_s": 6.823,
+      "stable_zero_required_s": 6.0,
+      "last_queue": {
+        "ts": 1794564157.0033045,
+        "observer": "rabbit1",
+        "ok": true,
+        "messages": 0,
+        "ready": 0,
+        "unacked": 0,
+        "leader": "rabbit3",
+        "members": [
+          "rabbit1",
+          "rabbit2",
+          "rabbit3"
+        ]
+      },
+      "consumers_alive": 2
+    },
+    "processes": [
+      {
+        "name": "r1401264cb3-p1",
+        "role": "producer",
+        "pid": 166653,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": null,
+        "forced": false
+      },
+      {
+        "name": "r1401264cb3-c1",
+        "role": "consumer",
+        "pid": 166644,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": "sigint",
+        "forced": false
+      },
+      {
+        "name": "r1401264cb3-c2",
+        "role": "consumer",
+        "pid": 166645,
+        "exit_code": 0,
+        "timed_out": false,
+        "stop_method": "sigint",
+        "forced": false
+      }
+    ]
+  }
+}

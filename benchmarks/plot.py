@@ -55,8 +55,6 @@ def plot_timeline(metrics: dict, out: Path) -> None:
     bucket = metrics.get("timeline_bucket_s") or 1.0
     ts = [b["t_rel"] for b in tl]
     fig, ax = plt.subplots(figsize=(10, 4.5))
-    # Step plot: each bucket is drawn flat over its own interval, so an empty
-    # bucket shows as a drop to zero instead of being interpolated over.
     ax.step(ts, [b["confirmed"] / bucket for b in tl], where="post", label="publish confirmed")
     ax.step(ts, [b["acked"] / bucket for b in tl], where="post", label="consumer acked", alpha=0.8)
     ax.set_ylim(bottom=0)
