@@ -1,36 +1,40 @@
 C4Deployment
-    title Deployment Diagram - Docker network hw2-net
+    title Deployment Diagram - Docker Network hw2-net
 
-    Deployment_Node(host, "Host machine", "Docker Engine / Docker Compose") {
-        Deployment_Node(net, "Docker bridge network: hw2-net", "user-defined bridge") {
+    Deployment_Node(host, "Host Machine", "Docker Engine / Compose") {
+        Deployment_Node(net, "Docker Network: hw2-net", "Bridge Network") {
 
-            Deployment_Node(n1, "rabbit1", "rabbitmq:3.13-management") {
-                Container(b1, "Broker + quorum replica", "rabbit@rabbit1", "AMQP 5672, UI 15672, metrics 15692 | host: 5672, 15672, 15692")
-                ContainerDb(v1, "rabbit1-data", "Docker volume", "/var/lib/rabbitmq")
+            Deployment_Node(n1, "rabbit1", "RabbitMQ 3.13") {
+                Container(b1, "RabbitMQ Node 1", "Broker", "AMQP: 5672")
+                ContainerDb(v1, "rabbit1-data", "Volume", "/var/lib/rabbitmq")
             }
-            Deployment_Node(n2, "rabbit2", "rabbitmq:3.13-management") {
-                Container(b2, "Broker + quorum replica", "rabbit@rabbit2", "AMQP 5672, UI 15672, metrics 15692 | host: 5673, 15673, 15693")
-                ContainerDb(v2, "rabbit2-data", "Docker volume", "/var/lib/rabbitmq")
+
+            Deployment_Node(n2, "rabbit2", "RabbitMQ 3.13") {
+                Container(b2, "RabbitMQ Node 2", "Broker", "AMQP: 5672")
+                ContainerDb(v2, "rabbit2-data", "Volume", "/var/lib/rabbitmq")
             }
-            Deployment_Node(n3, "rabbit3", "rabbitmq:3.13-management") {
-                Container(b3, "Broker + quorum replica", "rabbit@rabbit3", "AMQP 5672, UI 15672, metrics 15692 | host: 5674, 15674, 15694")
-                ContainerDb(v3, "rabbit3-data", "Docker volume", "/var/lib/rabbitmq")
+
+            Deployment_Node(n3, "rabbit3", "RabbitMQ 3.13") {
+                Container(b3, "RabbitMQ Node 3", "Broker", "AMQP: 5672")
+                ContainerDb(v3, "rabbit3-data", "Volume", "/var/lib/rabbitmq")
             }
-            Deployment_Node(pr, "prometheus", "prom/prometheus") {
-                Container(p, "Prometheus", "scrape interval 5s", "port 9090 | host: 9090")
-                ContainerDb(pv, "prometheus-data", "Docker volume", "/prometheus")
+
+            Deployment_Node(pr, "Prometheus", "prom/prometheus") {
+                Container(p, "Prometheus", "Monitoring", "Port: 9090")
             }
-            Deployment_Node(gr, "grafana", "grafana/grafana") {
-                Container(g, "Grafana", "provisioned dashboards", "port 3000 | host: 3000")
-                ContainerDb(gv, "grafana-data", "Docker volume", "/var/lib/grafana")
+
+            Deployment_Node(gr, "Grafana", "grafana/grafana") {
+                Container(g, "Grafana", "Dashboard", "Port: 3000")
             }
         }
     }
 
-    Rel(b1, b2, "epmd 4369 / Erlang dist. 25672 (Raft)")
-    Rel(b2, b3, "epmd 4369 / Erlang dist. 25672 (Raft)")
-    Rel(b1, b3, "epmd 4369 / Erlang dist. 25672 (Raft)")
-    Rel(p, b1, "scrape :15692")
-    Rel(p, b2, "scrape :15692")
-    Rel(p, b3, "scrape :15692")
-    Rel(g, p, "query :9090")
+    Rel(b1, b2, "Erlang distribution")
+    Rel(b2, b3, "Erlang distribution")
+    Rel(b1, b3, "Erlang distribution")
+
+    Rel(p, b1, "Scrape metrics")
+    Rel(p, b2, "Scrape metrics")
+    Rel(p, b3, "Scrape metrics")
+
+    Rel(g, p, "Query")
